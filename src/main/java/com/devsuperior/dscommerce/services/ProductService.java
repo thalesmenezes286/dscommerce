@@ -7,6 +7,7 @@ import com.devsuperior.dscommerce.entities.Category;
 import com.devsuperior.dscommerce.entities.Product;
 import com.devsuperior.dscommerce.repositories.ProductRepository;
 import com.devsuperior.dscommerce.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,19 @@ public class ProductService {
         entity = productRepository.save(entity);
 
         return new ProductDTO(entity);
+    }
+
+    @Transactional
+    public ProductDTO update(Long id, ProductDTO dto){
+        try{
+            Product entity = productRepository.getReferenceById(id);
+            copyDtoToEntity(dto, entity);
+            entity = productRepository.save(entity);
+
+            return new ProductDTO(entity);
+        }catch (EntityNotFoundException e){
+            throw new ResourceNotFoundException("RECURSO NÃO ENCONTRADO!");
+        }
     }
 
     private void copyDtoToEntity(ProductDTO dto, Product entity) {
