@@ -2,7 +2,6 @@ package com.devsuperior.dscommerce.controllers;
 
 
 import com.devsuperior.dscommerce.dto.ProductDTO;
-import com.devsuperior.dscommerce.dto.ProductMinDTO;
 import com.devsuperior.dscommerce.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,42 +16,54 @@ import java.net.URI;
 @RestController
 @RequestMapping(value = "/products")
 public class ProductController {
-
     @Autowired
     private ProductService productService;
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
+    public ResponseEntity<ProductDTO> findById(@PathVariable Long id){
 
-        ProductDTO dto = productService.findById(id);
+        ProductDTO productDTO = productService.findById(id);
 
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(productDTO);
     }
 
-    @GetMapping
-    public ResponseEntity<Page<ProductMinDTO>> findAll(@RequestParam(name = "name", defaultValue = "") String name, Pageable pageable) {
+    @GetMapping()
+    public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable){
 
-        Page<ProductMinDTO> dto = productService.findAll(name, pageable);
+        Page<ProductDTO> productDTO = productService.findAll(pageable);
 
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(productDTO);
     }
 
     @PostMapping
-    public ResponseEntity<ProductDTO> insert(@Valid @RequestBody ProductDTO productDTO) {
+    public ResponseEntity<ProductDTO> insert(@Valid @RequestBody ProductDTO productDTO){
 
         productDTO = productService.insert(productDTO);
-        URI uri = ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{id}")
-                .buildAndExpand(productDTO.getId()).toUri();
 
-        return ResponseEntity.created(uri).body(productDTO);
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .path("/{id}")
+                .buildAndExpand(productDTO.getId())
+                .toUri();
+
+        return ResponseEntity
+                .created(uri)
+                .body(productDTO);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ProductDTO> update(@PathVariable Long id, @Valid @RequestBody ProductDTO productDTO) {
+    public ResponseEntity<ProductDTO> update(@PathVariable Long id,@Valid @RequestBody ProductDTO productDTO){
 
         productDTO = productService.update(id, productDTO);
 
         return ResponseEntity.ok(productDTO);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> update(@PathVariable Long id){
+
+        productService.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
